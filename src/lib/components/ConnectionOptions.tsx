@@ -1,9 +1,7 @@
 import { Connector } from "@web3-react/types";
 import {
   CONNECTION_TYPE,
-  getHasMetaMaskExtensionInstalled,
 } from "../web3-connections/connections";
-import { METAMASK_URL } from "../web3-connections/constants";
 import { Option } from "./Option";
 
 type ConnectOptionsParams = {
@@ -22,10 +20,9 @@ export const ConnectionOptions = ({
   onDeactivate,
 }: ConnectOptionsParams) => {
   function getOptions(isActive: boolean) {
-    const hasMetamaskExtension = getHasMetaMaskExtensionInstalled();
     const isNoOptionAction =
       !isActive || (isActive && activeConnectionType === null);
-    const metaMaskOption = hasMetamaskExtension ? (
+    const metaMaskOption = (
       <Option
         connector={connector}
         isEnabled={
@@ -36,10 +33,6 @@ export const ConnectionOptions = ({
         onActivate={onActivate}
         onDeactivate={onDeactivate}
       />
-    ) : (
-      <a href={METAMASK_URL}>
-        <button>Install Metamask</button>
-      </a>
     );
 
     const conbaseWalletOption = (

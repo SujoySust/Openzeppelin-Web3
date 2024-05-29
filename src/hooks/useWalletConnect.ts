@@ -1,77 +1,30 @@
-import { NETWORKS, NETWORKS_SLUG } from "@/helper/core_constant";
+import {
+  CONNECTION_TYPE,
+  getConnection,
+} from "@/lib/web3-connections/connections";
 import { useWeb3React } from "@web3-react/core";
-import { InjectedConnector } from "@web3-react/injected-connector";
-import { WalletConnectConnector } from "@web3-react/walletconnect-connector";
+import { useEffect, useState } from "react";
 
 export const useWalletConnect = () => {
-  const network = NETWORKS[NETWORKS_SLUG.LOCAL];
+  const { chainId, account, isActive, connector } = useWeb3React();
+  const [connectionType, setConnectionType] = useState<
+    CONNECTION_TYPE | null | undefined
+  >(null);
 
-  const { account, isActivating, isActive, connector } = useWeb3React();
-
-  const connectToMetamask = () => {
-    const injected = new InjectedConnector({
-      supportedChainIds: [network.chain_id],
-    });
-
-    const connect = async () => {
-      try {
-        await connector.activate(injected);
-      } catch (ex) {
-        console.log(ex);
-      }
-    };
-
-    const disconnect = () => {
-      if (connector && typeof connector.deactivate === "function") {
-        try {
-          connector.deactivate();
-        } catch (ex) {
-          console.log(ex);
-        }
-      }
-    };
-
-    return {
-      connect,
-      disconnect,
-    };
-  };
-
-  const connectToWalletConnect = () => {
-    const walletconnect = new WalletConnectConnector({
-      rpc: { [network.chain_id]: network.rpc_url },
-      bridge: "https://bridge.walletconnect.org",
-      qrcode: true,
-    });
-    const connect = async () => {
-      try {
-        await connector.activate(walletconnect);
-      } catch (ex) {
-        console.log(ex);
-      }
-    };
-
-    const disconnect = () => {
-      if (connector && typeof connector.deactivate === "function") {
-        try {
-          connector.deactivate();
-        } catch (ex) {
-          console.log(ex);
-        }
-      }
-    };
-
-    return {
-      connect,
-      disconnect,
-    };
-  };
+  useEffect(() => {
+    if (!isActive) {
+      setConnectionType(undefined);
+    } else {
+      setConnectionType(getConnection(connector)?.type ?? undefined);
+    }
+  }, [connector, isActive]);
 
   return {
+    chainId,
     account,
-    isActivating,
     isActive,
-    connectToWalletConnect,
-    connectToMetamask,
+    connector,
+    connectionType,
+    setConnectionType
   };
 };
